@@ -13,10 +13,14 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+// Static route:
 app.use(express.static('public'));
+
+// Data is sent in json format.
+app.use(express.json());
 
 /* app.use(router); */
 
 app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
+  console.log(`Server is listening on http://localhost:${PORT}`);
 });
