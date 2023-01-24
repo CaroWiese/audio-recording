@@ -11,7 +11,7 @@ const router = require('./app/router');
 const app = express();
 
 app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.set('views', __dirname + '/app/views');
 
 /* // Static route:
 app.use(express.static('public')); */

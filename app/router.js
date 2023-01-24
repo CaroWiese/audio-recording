@@ -1,12 +1,15 @@
 const {Router} = require('express');
 const audioController = require('./audioController');
+/* const audioController = require('./audioController'); */
 
 const router = Router();
 
 //test route
 router.get('/hey', (_, response) => response.json('Hey world !'));
 
-router.get('/', audioController.homePage);
+router.get('/', audioController.demoPage);
+
+/* router.get('/', audioController.homePage); */
 
 /* // These would be routes for an API Rest:
 //retrieve all audio files

@@ -1,7 +1,14 @@
 const dataMapper = require('./dataMapper');
 
 const audioController = {
-  homePage: (req, res, next) => {
+
+  demoPage:(_, response) => {
+    response.render('Demo', {
+        title: 'View engine Demo'
+    })
+}
+
+  /* homePage: (req, res, next) => {
     // getting the list of all audios from db
     dataMapper.getAllAudios((err, audios) => {
       // if there's an error
@@ -11,10 +18,10 @@ const audioController = {
       }
       // if everything's alright, rendering the view of all audios
       res.render('index', {
-        audios,
+        audios
       });
     });
-  }
+  } */
 }
 
 module.exports = audioController;
