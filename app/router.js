@@ -1,6 +1,5 @@
 const {Router} = require('express');
 const audioController = require('./audioController');
-/* const audioController = require('./audioController'); */
 
 const router = Router();
 

@@ -13,8 +13,8 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/app/views');
 
-/* // Static route:
-app.use(express.static('public')); */
+// Static route:
+app.use(express.static('public'));
 
 // Data is sent in json format.
 app.use(express.json());

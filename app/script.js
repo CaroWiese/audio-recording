@@ -1,105 +1,193 @@
-const recordAudio = () =>
-        new Promise(async resolve => {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const mediaRecorder = new MediaRecorder(stream);
-          let audioChunks = [];
+/* // Script code and its different parts:
+ // 1. start recording audio
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
 
-          mediaRecorder.addEventListener('dataavailable', event => {
-            audioChunks.push(event.data);
-          });
+  // 2. store audio data chunks while recording
+      const audioChunks = [];
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
 
-          const start = () => {
-            audioChunks = [];
-            mediaRecorder.start();
+  // 4. convert audio data chunks into single audio blob
+      mediaRecorder.addEventListener("stop", () => {
+        const audioBlob = new Blob(audioChunks);
+
+  // 5. create URL for audio data blob
+        const audioUrl = URL.createObjectURL(audioBlob);
+      });
+
+  // 6. play audio
+        const audio = new Audio(audioUrl);
+          const play = () => {
+            audio.play();
           };
 
-          const stop = () =>
-            new Promise(resolve => {
-              mediaRecorder.addEventListener('stop', () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                const play = () => audio.play();
-                resolve({ audioChunks, audioBlob, audioUrl, play });
-              });
+  // 3. stop recording audio
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 3000);
+    })
 
-              mediaRecorder.stop();
-            });
+    // ... and always check for errors
+    .catch((error) => {
+      console.error(`${error.name}: ${error.message}`);
+    }); */
 
-          resolve({ start, stop });
+/* // abstracting the native API into a simpler by converting 
+// above into a function that returns a promise resolving 
+// to an object that contains the API with two functions: 
+// start and stop
+// audioblob can be used to store data on server, 
+// audioURL for custom behaviour related to playing the audio
+const recordAudio = () => {
+  return new Promise(resolve => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+
+        mediaRecorder.addEventListener("dataavailable", event => {
+          audioChunks.push(event.data);
         });
 
-      const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+        const start = () => {
+          mediaRecorder.start();
+        };
 
-      const recordButton = document.querySelector('#record');
-      const stopButton = document.querySelector('#stop');
-      const playButton = document.querySelector('#play');
-      const saveButton = document.querySelector('#save');
-      const savedAudioMessagesContainer = document.querySelector('#saved-audio-messages');
+        const stop = () => {
+          return new Promise(resolve => {
+            mediaRecorder.addEventListener("stop", () => {
+              const audioBlob = new Blob(audioChunks);
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audio = new Audio(audioUrl);
+              const play = () => {
+                audio.play();
+              };
 
-      let recorder;
-      let audio;
+              resolve({ audioBlob, audioUrl, play });
+            });
 
-      recordButton.addEventListener('click', async () => {
-        recordButton.setAttribute('disabled', true);
-        stopButton.removeAttribute('disabled');
-        playButton.setAttribute('disabled', true);
-        saveButton.setAttribute('disabled', true);
-        if (!recorder) {
-          recorder = await recordAudio();
-        }
-        recorder.start();
-      });
-
-      stopButton.addEventListener('click', async () => {
-        recordButton.removeAttribute('disabled');
-        stopButton.setAttribute('disabled', true);
-        playButton.removeAttribute('disabled');
-        saveButton.removeAttribute('disabled');
-        audio = await recorder.stop();
-      });
-
-      playButton.addEventListener('click', () => {
-        audio.play();
-      });
-
-      saveButton.addEventListener('click', () => {
-        const reader = new FileReader();
-        reader.readAsDataURL(audio.audioBlob);
-        reader.onload = () => {
-          const base64AudioMessage = reader.result.split(',')[1];
-
-          fetch('/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: base64AudioMessage })
-          }).then(res => {
-            if (res.status === 201) {
-              return populateAudioMessages();
-            }
-            console.log('Invalid status saving audio message: ' + res.status);
+            mediaRecorder.stop();
           });
         };
+
+        resolve({ start, stop });
+      });
+  });
+};
+ */
+
+/* // how to use above simplified API :
+(async () => {
+  const recorder = await recordAudio();
+  recorder.start();
+
+  setTimeout(async () => {
+    const audio = await recorder.stop();
+    audio.play();
+  }, 3000);
+})();
+
+// even simpler by removing the callback passed to setTimeout and 
+// replace that with a call to a sleep function
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+(async () => {
+  const recorder = await recordAudio();
+  recorder.start();
+  await sleep(3000);
+  const audio = await recorder.stop();
+  audio.play();
+})(); */
+
+// simplityiyng recordAudio even further by replacing the recordAudio's
+// promise callback with an async function and using await in front of the call
+// to getUserMedia
+/* const recordAudio = () =>
+  new Promise(async resolve => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const audioChunks = [];
+
+    mediaRecorder.addEventListener("dataavailable", event => {
+      audioChunks.push(event.data);
+    });
+
+    const start = () => mediaRecorder.start();
+
+    const stop = () =>
+      new Promise(resolve => {
+        mediaRecorder.addEventListener("stop", () => {
+          const audioBlob = new Blob(audioChunks);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          const play = () => audio.play();
+          resolve({ audioBlob, audioUrl, play });
+        });
+
+        mediaRecorder.stop();
       });
 
-      const populateAudioMessages = () => {
-        return fetch('/messages').then(res => {
-          if (res.status === 200) {
-            return res.json().then(json => {
-              json.messageFilenames.forEach(filename => {
-                let audioElement = document.querySelector(`[data-audio-filename="${filename}"]`);
-                if (!audioElement) {
-                  audioElement = document.createElement('audio');
-                  audioElement.src = `/messages/${filename}`;
-                  audioElement.setAttribute('data-audio-filename', filename);
-                  audioElement.setAttribute('controls', true);
-                  savedAudioMessagesContainer.appendChild(audioElement);
-                }
-              });
-            });
-          }
-          console.log('Invalid status getting messages: ' + res.status);
-        });
-      };
+    resolve({ start, stop });
+  });
 
-      populateAudioMessages();
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+(async () => {
+  const recorder = await recordAudio();
+  recorder.start();
+  await sleep(3000);
+  const audio = await recorder.stop();
+  audio.play();
+})(); */
+
+// more robust by wrapping the recorder code in a try/catch statement and deal
+// with any possible errors such as old browsers lacking support. If we want to
+// have a better user experience, we can easily display the state to the user 
+// either with plain JavaScript or with a framework/library of our choice (e.g. 
+// React, Elm, Vue, Angular, etc). If we want to save the recorded audio blob on
+// a server, we can send a request to the server with the audio blob as our payload. 
+const recordAudio = () =>
+  new Promise(async resolve => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+
+      const start = () => mediaRecorder.start();
+
+      const stop = () =>
+        new Promise(resolve => {
+          mediaRecorder.addEventListener("stop", () => {
+            const audioBlob = new Blob(audioChunks);
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            const play = () => audio.play();
+            resolve({ audioBlob, audioUrl, play });
+          });
+
+          mediaRecorder.stop();
+        });
+
+      resolve({ start, stop });
+    } catch {
+      console.error(`${error.name}: ${error.message}`);
+    }
+  });
+
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+(async () => {
+  const recorder = await recordAudio();
+  recorder.start();
+  await sleep(3000);
+  const audio = await recorder.stop();
+  audio.play();
+})();
