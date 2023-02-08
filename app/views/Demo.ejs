@@ -1,25 +1,31 @@
 <%- include('partials/header') %>
 
-  <button type="button" id="record">Record</button>
-  <button type="button" id="stop" disabled>Stop</button>
-  <button type="button" id="play" disabled>Play</button>
-  <button type="button" id="save" disabled>Save</button>
+
+  
+
+  <header>
+    <ul>
+      <li><button type="button" id="record" onclick="start">Record</button></li>
+      <li><button type="button" id="stop" disabled onclick="stop">Stop</button></li>
+      <li><button type="button" id="play" disabled onclick="play">Play</button></li>
+      <li><button type="button" id="save" disabled onclick="addAudio">Save</button></li>
+    </ul>
+  </header>
+
   <div id="saved-audio-messages">
       <h2>Saved messages</h2>
+    <% if (locals.audio) { %>
+      <ul>
+        <% for( let index = 0; index < audio.length; index++ ) {
+          <li><%= audio.url[index] %></li>
+        <% } %>
+      </ul>
+    <%} else { %>
+    <h3>There are no saved audio messages.</h3>
+    <%}%>
     </div>
+    
+    <!-- <script src="../script.js"></script> -->
     <script type="text/html" src="../script.js"></script>
 
 <%- include('partials/footer') %> 
-
-
-
-
-<!-- <!- For printing variable these
-	tags are used: <%= %> 
-<h1> <%= title %> </h1>
-	
-<!- For business logic these
-	tags are used: <% %> 
-<% if(true){ %>
-	<h4>Greetings from geeksforgeeks</h4>
-<% } %> -->
