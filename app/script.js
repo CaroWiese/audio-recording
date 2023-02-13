@@ -1,25 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link  rel="stylesheet" href="../../public/css/reset.css">
-  <link  rel="stylesheet" href="../../public/css/style.css">
- <!--  to not show favicon error : -->
-  <link rel="shortcut icon" href="#">
-	<title>Audio Recording ... hopefully!</title>
-</head>
-<body>
-  <button type="button" id="record">Record</button>
-  <button type="button" id="stop" disabled>Stop</button>
-  <button type="button" id="play" disabled>Play</button>
-  <button type="button" id="save" disabled>Save</button>
-  <div id="saved-audio-messages">
-      <h2>Saved messages</h2>
-    </div>
-    <script src="../script.js">
-      /* const recordAudio = () =>
+const recordAudio = () =>
   new Promise(async resolve => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -59,7 +38,4 @@ const sleep = time => new Promise(resolve => setTimeout(resolve, time));
   await sleep(3000);
   const audio = await recorder.stop();
   audio.play();
-})(); */
-    </script>
-  </body>
-</html>
+})();

@@ -20,7 +20,7 @@ app.set('view engine', 'ejs');
 // to locate views (_dirname allows to recuperate the path of current file):
 app.set('views', __dirname + '/app/views');
 // to tell express the path to static files:
-app.use(express.static('public'));
+app.use(express.static('app'));
 app.use(cors());
 // data is sent in json format (POST routes)
 app.use(express.json());
