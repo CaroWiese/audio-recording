@@ -1,31 +1,65 @@
-<%- include('partials/header') %>
-
-
-  
-
-  <header>
-    <ul>
-      <li><button type="button" id="record" onclick="start">Record</button></li>
-      <li><button type="button" id="stop" disabled onclick="stop">Stop</button></li>
-      <li><button type="button" id="play" disabled onclick="play">Play</button></li>
-      <li><button type="button" id="save" disabled onclick="addAudio">Save</button></li>
-    </ul>
-  </header>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!--  <link  rel="stylesheet" href="../../public/css/reset.css">
+  <link  rel="stylesheet" href="../../public/css/style.css"> -->
+ <!--  to not show favicon error : -->
+  <link rel="shortcut icon" href="#">
+	<title>Audio Recording ... hopefully!</title>
+</head>
+<body>
+  <button type="button" id="record">Record</button>
+  <button type="button" id="stop" disabled>Stop</button>
+  <button type="button" id="play" disabled>Play</button>
+  <button type="button" id="save" disabled>Save</button>
   <div id="saved-audio-messages">
       <h2>Saved messages</h2>
-    <% if (locals.audio) { %>
-      <ul>
-        <% for( let index = 0; index < audio.length; index++ ) {
-          <li><%= audio.url[index] %></li>
-        <% } %>
-      </ul>
-    <%} else { %>
-    <h3>There are no saved audio messages.</h3>
-    <%}%>
     </div>
-    
-    <!-- <script src="../script.js"></script> -->
-    <script type="text/html" src="../script.js"></script>
+    <script >
+      const recordAudio = () =>
+  new Promise(async resolve => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
 
-<%- include('partials/footer') %> 
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+
+      const start = () => mediaRecorder.start();
+
+      const stop = () =>
+        new Promise(resolve => {
+          mediaRecorder.addEventListener("stop", () => {
+            const audioBlob = new Blob(audioChunks);
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            const play = () => audio.play();
+            resolve({ audioBlob, audioUrl, play });
+          });
+
+          mediaRecorder.stop();
+        });
+
+      resolve({ start, stop });
+    } catch {
+      console.error(`${error.name}: ${error.message}`);
+    }
+  });
+
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+(async () => {
+  const recorder = await recordAudio();
+  recorder.start();
+  await sleep(3000);
+  const audio = await recorder.stop();
+  audio.play();
+})();
+    </script>
+  </body>
+</html>
