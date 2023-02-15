@@ -27,7 +27,7 @@ app.use((error, request, response, next) => {
   next(error);
 });
 app.use((error, request, response, next) => { //error management within application via 
-  response.status(500).render('error'); //middleware with 4 parameter signature (4th is the rror to manage)
+  response.status(500).render('error'); //middleware with 4 parameter signature (4th is the error to manage)
 });
 
 app.listen(PORT, () => {
